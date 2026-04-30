@@ -403,7 +403,7 @@
 <div class="app">
     <div class="profile-card">
         <div class="profile-row">
-            <div><strong>⚡ BoosterGooner pro max</strong></div>
+            <div><strong>⚡ BoosterGooner</strong></div>
             <div class="level-badge" id="levelBadge">Niveau 1</div>
         </div>
         <div class="xp-bar"><div class="xp-progress" id="xpProgress"></div></div>
@@ -419,19 +419,16 @@
 
     <div class="booster-selector" id="boosterSelector">
         <div class="booster-card" data-set="swsh7">
-            <img src="https://archives.bulbagarden.net/media/upload/3/3f/SwordShield_HeroesTranscendants_Booster.png">
             <h4>🦸 HÉROS TRANSCENDANTS</h4>
         </div>
         <div class="booster-card" data-set="swsh9">
-            <img src="https://archives.bulbagarden.net/media/upload/2/2e/SwordShield_OriginePerdue_Booster.png">
             <h4>🔮 ORIGINE PERDUE</h4>
         </div>
     </div>
 
     <div class="booster-zone">
         <div class="swipe-booster" id="swipeBooster">
-            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 20px; text-align:center;">
-                <div style="font-size:1.3rem;">✨ BOOSTER ✨</div>
+            <div style=" padding: 20px; text-align:center;">
             </div>
         </div>
         <div class="swipe-instruction">👉 GLISSE VERS LA DROITE POUR OUVRIR 👈</div>
@@ -447,8 +444,8 @@
     
     // Les sets à charger (IDs officiels Pokémon TCG)
     const SETS = {
-        heroes: { id: "swsh7", name: "Héros Transcendants", displayName: "Héros Transcendants", boosterImage: "https://archives.bulbagarden.net/media/upload/3/3f/SwordShield_HeroesTranscendants_Booster.png" },
-        origin: { id: "swsh9", name: "Origine Perdue", displayName: "Origine Perdue", boosterImage: "https://archives.bulbagarden.net/media/upload/2/2e/SwordShield_OriginePerdue_Booster.png" }
+        heroes: { id: "swsh7", name: "Héros Transcendants", displayName: "Héros Transcendants", boosterImage: "https://i.imgur.com/kUx6gv4.png" },
+        origin: { id: "swsh9", name: "Origine Perdue", displayName: "Origine Perdue", boosterImage: "https://i.imgur.com/NXbUYi0.png" }
     };
 
     let cardsCache = { heroes: [], origin: [] };
@@ -803,7 +800,7 @@
             swipeEl.style.backgroundPosition = 'center';
             const textDiv = swipeEl.querySelector('div');
             if (textDiv) {
-                textDiv.innerHTML = `<div style="font-size:1.3rem;">✨ BOOSTER ✨</div><div style="font-size:0.7rem; margin-top:100px;">${selectedBooster === "heroes" ? "Héros Transcendants" : "Origine Perdue"}</div>`;
+                textDiv.innerHTML = `</div><div style="font-size:0.7rem; margin-top:100px;">${selectedBooster === "heroes" ? "" : ""}</div>`;
             }
         };
         
