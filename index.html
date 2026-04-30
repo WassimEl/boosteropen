@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BoosterGooner - Pokémon TCG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a15 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 16px;
+            color: #fff;
+        }
+
+        .app {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #f5af19, #e74c3c);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        .xp-bar {
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .xp-progress {
+            background: linear-gradient(135deg, #f5af19, #e74c3c);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: rgba(0,0,0,0.4);
+            border-radius: 14px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #f5af19;
+        }
+
+        .stat-label {
+            font-size: 0.6rem;
+            opacity: 0.7;
+        }
+
+        .booster-selector {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .booster-card {
+            flex: 1;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            border-radius: 20px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .booster-card.active {
+            border-color: #f5af19;
+            box-shadow: 0 0 20px rgba(245,175,25,0.3);
+        }
+
+        .booster-card img {
+            width: 100%;
+            border-radius: 16px;
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #f5af19, #e74c3c);
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 16px;
+            transition: transform 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .booster-zone {
+            background: rgba(0,0,0,0.3);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .swipe-booster {
+            width: 260px;
+            height: 350px;
+            margin: 0 auto;
+            border-radius: 20px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            transition: transform 0.1s, opacity 0.1s;
+        }
+
+        .swipe-booster:active {
+            cursor: grabbing;
+        }
+
+        .swipe-booster.dragging {
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+
+        .swipe-instruction {
+            background: rgba(0,0,0,0.6);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            margin-top: 15px;
+            display: inline-block;
+        }
+
+        .card-reveal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.96);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .card-container {
+            perspective: 800px;
+            width: 320px;
+        }
+
+        .revealed-card {
+            width: 100%;
+            background: linear-gradient(145deg, #2c2c3e, #1e1e2e);
+            border-radius: 20px;
+            padding: 15px;
+            animation: cardFloat 0.4s ease-out;
+            transition: transform 0.08s linear;
+            transform-style: preserve-3d;
+            cursor: grab;
+            position: relative;
+        }
+
+        .revealed-card:active {
+            cursor: grabbing;
+        }
+
+        @keyframes cardFloat {
+            from { opacity: 0; transform: scale(0.5) translateY(100px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .holo-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .holo-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -100%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 215, 0, 0.5) 45%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 215, 0, 0.5) 55%, transparent 70%);
+            animation: holoShine 2.5s infinite;
+            pointer-events: none;
+            z-index: 10;
+            border-radius: 20px;
+        }
+
+        @keyframes holoShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .glow-card {
+            animation: cardGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes cardGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245,175,25,0.3); }
+            50% { box-shadow: 0 0 35px rgba(245,175,25,0.8); }
+        }
+
+        .star-card::after {
+            content: '⭐';
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 1.5rem;
+            animation: starTwinkle 0.8s infinite;
+            z-index: 11;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); text-shadow: 0 0 10px gold; }
+        }
+
+        .revealed-card img {
+            width: 100%;
+            border-radius: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-rarity {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 8px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            background: #0f0f1a;
+            padding: 10px 0;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            background: #f5af19;
+            color: #1a1a2e;
+        }
+
+        .collection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .collection-item {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .collection-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .collection-info {
+            flex: 1;
+        }
+
+        .collection-name {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .collection-count {
+            background: #f5af19;
+            color: #1a1a2e;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .inspect-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.98);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .inspect-card {
+            width: 340px;
+            transition: transform 0.08s linear;
+            cursor: grab;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="profile-card">
+        <div class="profile-row">
+            <div><strong>⚡ BoosterGooner</strong></div>
+            <div class="level-badge" id="levelBadge">Niveau 1</div>
+        </div>
+        <div class="xp-bar"><div class="xp-progress" id="xpProgress"></div></div>
+        <div style="font-size: 0.7rem; margin-top: 5px;" id="xpText">0 / 100 XP</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="boostersOpened">0</div><div class="stat-label">Boosters</div></div>
+        <div class="stat-card"><div class="stat-value" id="cardsObtained">0</div><div class="stat-label">Cartes</div></div>
+        <div class="stat-card"><div class="stat-value" id="uniqueCards">0</div><div class="stat-label">Uniques</div></div>
+        <div class="stat-card"><div class="stat-value" id="completion">0%</div><div class="stat-label">Complétion</div></div>
+    </div>
+
+    <div class="booster-selector" id="boosterSelector">
+        <div class="booster-card" data-set="swsh7">
+            <img src="https://archives.bulbagarden.net/media/upload/3/3f/SwordShield_HeroesTranscendants_Booster.png">
+            <h4>🦸 HÉROS TRANSCENDANTS</h4>
+        </div>
+        <div class="booster-card" data-set="swsh9">
+            <img src="https://archives.bulbagarden.net/media/upload/2/2e/SwordShield_OriginePerdue_Booster.png">
+            <h4>🔮 ORIGINE PERDUE</h4>
+        </div>
+    </div>
+
+    <div class="booster-zone">
+        <div class="swipe-booster" id="swipeBooster">
+            <div style="background: rgba(0,0,0,0.5); padding: 20px; border-radius: 20px; text-align:center;">
+                <div style="font-size:1.3rem;">✨ BOOSTER ✨</div>
+            </div>
+        </div>
+        <div class="swipe-instruction">👉 GLISSE VERS LA DROITE POUR OUVRIR 👈</div>
+    </div>
+
+    <button class="btn" id="openBtn">🎴 OUVRIR LE BOOSTER (+50 XP)</button>
+    <button class="btn btn-secondary" id="collectionBtn">📦 MA COLLECTION</button>
+</div>
+
+<script>
+    // ========== POKEMON TCG API (GRATUITE, SANS CLÉ) ==========
+    const API_BASE = "https://api.pokemontcg.io/v2";
+    
+    // Les sets à charger (IDs officiels Pokémon TCG)
+    const SETS = {
+        heroes: { id: "swsh7", name: "Héros Transcendants", displayName: "Héros Transcendants", boosterImage: "https://archives.bulbagarden.net/media/upload/3/3f/SwordShield_HeroesTranscendants_Booster.png" },
+        origin: { id: "swsh9", name: "Origine Perdue", displayName: "Origine Perdue", boosterImage: "https://archives.bulbagarden.net/media/upload/2/2e/SwordShield_OriginePerdue_Booster.png" }
+    };
+
+    let cardsCache = { heroes: [], origin: [] };
+    let collection = [];
+    let boostersOpened = 0;
+    let currentLevel = 1;
+    let currentXP = 0;
+    let selectedBooster = "heroes";
+    let isLoading = true;
+    const LEVELS = [100, 200, 350, 500, 700];
+
+    // Mapping des raretés officielles
+    function mapRarity(rarity) {
+        const map = {
+            "Common": "Common",
+            "Uncommon": "Uncommon",
+            "Rare": "Rare",
+            "Rare Holo": "Rare",
+            "Rare Holo V": "Double Rare",
+            "Rare Holo VMAX": "Double Rare",
+            "Rare Holo VSTAR": "Double Rare",
+            "Rare Ultra": "Double Rare",
+            "Rare Secret": "Secret Rare",
+            "Illustration Rare": "Double Rare"
+        };
+        return map[rarity] || "Common";
+    }
+
+    function getRarityColor(rarity) {
+        if (rarity === "Secret Rare") return "#ef4444";
+        if (rarity === "Double Rare") return "#8b5cf6";
+        if (rarity === "Rare") return "#3b82f6";
+        if (rarity === "Uncommon") return "#10b981";
+        return "#6b7280";
+    }
+
+    function hasHoloEffect(rarity) {
+        return rarity === "Double Rare" || rarity === "Secret Rare" || rarity === "Rare";
+    }
+
+    // Récupérer les cartes d'un set via Pokémon TCG API
+    async function fetchSetCards(setId, setName) {
+        try {
+            console.log(`Chargement de ${setName} (${setId})...`);
+            const url = `${API_BASE}/cards?q=set.id:${setId}&pageSize=100`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            const cards = data.data || [];
+            
+            console.log(`✅ ${setName}: ${cards.length} cartes chargées`);
+            
+            return cards.map(card => ({
+                id: card.id,
+                name: card.name,
+                rarity: mapRarity(card.rarity),
+                image: card.images?.large || card.images?.small || "",
+                set: setName
+            }));
+        } catch (error) {
+            console.error(`Erreur chargement ${setName}:`, error);
+            return [];
+        }
+    }
+
+    // Chargement de tous les sets
+    async function loadAllCards() {
+        isLoading = true;
+        document.getElementById('openBtn').innerHTML = "🎴 CHARGEMENT DES CARTES...";
+        
+        try {
+            const [heroesCards, originCards] = await Promise.all([
+                fetchSetCards(SETS.heroes.id, SETS.heroes.displayName),
+                fetchSetCards(SETS.origin.id, SETS.origin.displayName)
+            ]);
+            
+            cardsCache.heroes = heroesCards;
+            cardsCache.origin = originCards;
+            
+            console.log(`📊 Total: ${cardsCache.heroes.length} cartes dans ${SETS.heroes.displayName}`);
+            console.log(`📊 Total: ${cardsCache.origin.length} cartes dans ${SETS.origin.displayName}`);
+            
+            isLoading = false;
+            document.getElementById('openBtn').innerHTML = "🎴 OUVRIR UN BOOSTER (+50 XP)";
+            updateBoosterImage();
+            updateUI();
+            
+        } catch (error) {
+            console.error("Erreur globale:", error);
+            isLoading = false;
+            document.getElementById('openBtn').innerHTML = "🎴 OUVRIR UN BOOSTER (+50 XP)";
+            updateBoosterImage();
+            updateUI();
+        }
+    }
+
+    function getRandomCard(setName) {
+        const cards = cardsCache[setName];
+        if (!cards.length) return null;
+        
+        const rarities = ["Common", "Uncommon", "Rare", "Double Rare", "Secret Rare"];
+        const weights = [40, 30, 18, 10, 2];
+        let rand = Math.random() * 100;
+        let accum = 0;
+        let selectedRarity = "Common";
+        for (let i = 0; i < rarities.length; i++) {
+            accum += weights[i];
+            if (rand < accum) {
+                selectedRarity = rarities[i];
+                break;
+            }
+        }
+        
+        let possible = cards.filter(c => c.rarity === selectedRarity);
+        if (possible.length === 0) possible = cards;
+        let selected = possible[Math.floor(Math.random() * possible.length)];
+        
+        return {
+            ...selected,
+            price: (Math.random() * 20 + 1).toFixed(2),
+            obtainedAt: Date.now()
+        };
+    }
+
+    function generatePack(size = 10) {
+        let pack = [];
+        for (let i = 0; i < size; i++) {
+            let card = getRandomCard(selectedBooster);
+            if (card) pack.push(card);
+        }
+        return pack;
+    }
+
+    function addXP(amount) {
+        currentXP += amount;
+        while (currentLevel <= LEVELS.length && currentXP >= LEVELS[currentLevel - 1]) {
+            currentXP -= LEVELS[currentLevel - 1];
+            currentLevel++;
+            alert(`🎉 Niveau ${currentLevel} atteint !`);
+        }
+        updateUI();
+        saveData();
+    }
+
+    function openBooster() {
+        if (isLoading) {
+            alert("Chargement des cartes en cours...");
+            return;
+        }
+        boostersOpened++;
+        addXP(50);
+        const pack = generatePack(10);
+        if (pack.length === 0) {
+            alert("Erreur: Impossible de générer les cartes");
+            return;
+        }
+        showCardReveal(pack, 0);
+        saveData();
+        updateUI();
+    }
+
+    // Effet 3D
+    function add3DEffect(element) {
+        let targetX = 0, targetY = 0;
+        let currentX = 0, currentY = 0;
+        let animationFrame = null;
+        
+        const updateTransform = () => {
+            currentX += (targetX - currentX) * 0.3;
+            currentY += (targetY - currentY) * 0.3;
+            element.style.transform = `perspective(800px) rotateY(${currentX}deg) rotateX(${currentY}deg)`;
+            if (Math.abs(targetX - currentX) > 0.01 || Math.abs(targetY - currentY) > 0.01) {
+                animationFrame = requestAnimationFrame(updateTransform);
+            } else {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+        };
+        
+        const onMove = (e) => {
+            const rect = element.getBoundingClientRect();
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            let relX = (clientX - rect.left) / rect.width;
+            let relY = (clientY - rect.top) / rect.height;
+            
+            let rotateY = (relX - 0.5) * 20;
+            let rotateX = (0.5 - relY) * 15;
+            
+            rotateY = Math.max(-15, Math.min(15, rotateY));
+            rotateX = Math.max(-12, Math.min(12, rotateX));
+            
+            targetX = rotateY;
+            targetY = rotateX;
+            
+            if (!animationFrame) {
+                animationFrame = requestAnimationFrame(updateTransform);
+            }
+            e.preventDefault();
+        };
+        
+        const onLeave = () => {
+            targetX = 0;
+            targetY = 0;
+            if (!animationFrame) {
+                animationFrame = requestAnimationFrame(updateTransform);
+            }
+        };
+        
+        element.addEventListener('mousemove', onMove);
+        element.addEventListener('mouseleave', onLeave);
+        element.addEventListener('touchmove', onMove, { passive: false });
+        element.addEventListener('touchend', onLeave);
+    }
+
+    function showCardReveal(pack, index) {
+        if (index >= pack.length) {
+            updateUI();
+            return;
+        }
+        
+        const card = pack[index];
+        if (!card) {
+            showCardReveal(pack, index + 1);
+            return;
+        }
+        
+        collection.push(card);
+        saveData();
+        
+        const isHolo = hasHoloEffect(card.rarity);
+        const isStar = card.rarity === "Secret Rare";
+        const rarityColor = getRarityColor(card.rarity);
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'card-reveal';
+        overlay.innerHTML = `
+            <div class="card-container">
+                <div class="revealed-card ${isHolo ? 'holo-card glow-card' : ''} ${isStar ? 'star-card' : ''}" id="revealCard">
+                    <img src="${card.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png'">
+                    <div style="font-weight:bold; margin-top:8px; font-size:1.1rem;">${card.name}</div>
+                    <div class="card-rarity" style="background:${rarityColor}">${card.rarity}</div>
+                    <div style="font-size:0.8rem; margin-top:5px;">${card.set}</div>
+                </div>
+            </div>
+            <div style="margin:15px; font-size:1rem;">Carte ${index+1} / ${pack.length}</div>
+            <button class="btn" id="nextCard" style="width:auto; padding:12px 30px; margin-bottom:0;">✨ CARTE SUIVANTE ✨</button>
+        `;
+        document.body.appendChild(overlay);
+        
+        add3DEffect(overlay.querySelector('#revealCard'));
+        
+        overlay.querySelector('#nextCard').onclick = () => {
+            overlay.remove();
+            showCardReveal(pack, index + 1);
+        };
+    }
+
+    function inspectCard(card) {
+        const isHolo = hasHoloEffect(card.rarity);
+        const isStar = card.rarity === "Secret Rare";
+        const rarityColor = getRarityColor(card.rarity);
+        
+        const modal = document.createElement('div');
+        modal.className = 'inspect-modal';
+        modal.innerHTML = `
+            <div class="inspect-card revealed-card ${isHolo ? 'holo-card glow-card' : ''} ${isStar ? 'star-card' : ''}" id="inspectCard">
+                <img src="${card.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png'">
+                <div style="font-weight:bold; margin-top:8px; font-size:1.1rem;">${card.name}</div>
+                <div class="card-rarity" style="background:${rarityColor}">${card.rarity}</div>
+                <div style="font-size:0.8rem; margin-top:5px;">${card.set}</div>
+            </div>
+            <button class="btn" id="closeInspect" style="width:auto; margin-top:20px; padding:12px 30px;">FERMER</button>
+        `;
+        document.body.appendChild(modal);
+        add3DEffect(modal.querySelector('#inspectCard'));
+        modal.querySelector('#closeInspect').onclick = () => modal.remove();
+    }
+
+    function showCollection() {
+        const grouped = new Map();
+        collection.forEach(card => {
+            const key = card.id;
+            if (grouped.has(key)) grouped.get(key).count++;
+            else grouped.set(key, { ...card, count: 1 });
+        });
+        const sorted = Array.from(grouped.values()).reverse();
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = `
+            <div class="modal-header">
+                <div><h2>📦 Ma Collection</h2><div style="font-size:0.8rem;">${collection.length} cartes | ${sorted.length} uniques</div></div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="filter-buttons" id="filterBtns">
+                <button class="filter-btn active" data-filter="all">Toutes</button>
+                <button class="filter-btn" data-filter="Common">Communes</button>
+                <button class="filter-btn" data-filter="Uncommon">Peu communes</button>
+                <button class="filter-btn" data-filter="Rare">Rares</button>
+                <button class="filter-btn" data-filter="Double Rare">Double Rares</button>
+                <button class="filter-btn" data-filter="Secret Rare">⭐ Secrètes</button>
+            </div>
+            <div class="collection-list" id="collectionList"></div>
+        `;
+        
+        function render(filter = "all") {
+            const list = modal.querySelector('#collectionList');
+            const filtered = sorted.filter(c => filter === "all" || c.rarity === filter);
+            list.innerHTML = filtered.map(card => {
+                const color = getRarityColor(card.rarity);
+                return `<div class="collection-item" data-card-id="${card.id}">
+                    <img src="${card.image}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png'">
+                    <div class="collection-info">
+                        <div class="collection-name">${card.name}${card.count > 1 ? `<span class="collection-count">x${card.count}</span>` : ''}</div>
+                        <div class="collection-rarity" style="background:${color}">${card.rarity}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            list.querySelectorAll('.collection-item').forEach(item => {
+                const cardData = filtered.find(c => c.id === item.dataset.cardId);
+                if (cardData) item.onclick = () => inspectCard(cardData);
+            });
+        }
+        document.body.appendChild(modal);
+        render();
+        modal.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.onclick = () => {
+                modal.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                render(btn.dataset.filter);
+            };
+        });
+        modal.querySelector('.close-modal').onclick = () => modal.remove();
+    }
+
+    // Setup glissement
+    function setupSwipe() {
+        const swipeEl = document.getElementById('swipeBooster');
+        let startX = null;
+        let startY = null;
+        
+        window.updateBoosterImage = () => {
+            const images = { heroes: SETS.heroes.boosterImage, origin: SETS.origin.boosterImage };
+            swipeEl.style.backgroundImage = `url('${images[selectedBooster]}')`;
+            swipeEl.style.backgroundSize = 'cover';
+            swipeEl.style.backgroundPosition = 'center';
+            const textDiv = swipeEl.querySelector('div');
+            if (textDiv) {
+                textDiv.innerHTML = `<div style="font-size:1.3rem;">✨ BOOSTER ✨</div><div style="font-size:0.7rem; margin-top:100px;">${selectedBooster === "heroes" ? "Héros Transcendants" : "Origine Perdue"}</div>`;
+            }
+        };
+        
+        const onStart = (e) => {
+            startX = e.touches ? e.touches[0].clientX : e.clientX;
+            startY = e.touches ? e.touches[0].clientY : e.clientY;
+            swipeEl.classList.add('dragging');
+            e.preventDefault();
+        };
+        
+        const onMove = (e) => {
+            if (startX === null) return;
+            let currentX = e.touches ? e.touches[0].clientX : e.clientX;
+            let currentY = e.touches ? e.touches[0].clientY : e.clientY;
+            let diffX = currentX - startX;
+            let diffY = Math.abs(currentY - startY);
+            
+            if (diffX > 50 && diffY < 30) {
+                swipeEl.classList.remove('dragging');
+                openBooster();
+                startX = null;
+            }
+            e.preventDefault();
+        };
+        
+        const onEnd = () => {
+            swipeEl.classList.remove('dragging');
+            startX = null;
+        };
+        
+        swipeEl.addEventListener('touchstart', onStart, { passive: false });
+        swipeEl.addEventListener('touchmove', onMove, { passive: false });
+        swipeEl.addEventListener('touchend', onEnd);
+        swipeEl.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+        
+        window.updateBoosterImage();
+    }
+
+    function updateUI() {
+        document.getElementById('boostersOpened').innerHTML = boostersOpened;
+        document.getElementById('cardsObtained').innerHTML = collection.length;
+        const unique = new Set(collection.map(c => c.id)).size;
+        document.getElementById('uniqueCards').innerHTML = unique;
+        const total = cardsCache.heroes.length + cardsCache.origin.length;
+        const completion = total ? Math.round((unique / total) * 100) : 0;
+        document.getElementById('completion').innerHTML = `${completion}%`;
+        document.getElementById('levelBadge').innerHTML = `Niveau ${currentLevel}`;
+        const needed = LEVELS[currentLevel - 1] || LEVELS[LEVELS.length - 1];
+        document.getElementById('xpProgress').style.width = `${Math.min(100, (currentXP / needed) * 100)}%`;
+        document.getElementById('xpText').innerHTML = `${currentXP} / ${needed} XP`;
+    }
+
+    function saveData() {
+        localStorage.setItem("boostergooner_tcgapi", JSON.stringify({ collection, boostersOpened, currentLevel, currentXP }));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem("boostergooner_tcgapi");
+        if (saved) {
+            try {
+                const d = JSON.parse(saved);
+                collection = d.collection || [];
+                boostersOpened = d.boostersOpened || 0;
+                currentLevel = d.currentLevel || 1;
+                currentXP = d.currentXP || 0;
+            } catch(e) {}
+        }
+        updateUI();
+    }
+
+    // Sélection booster
+    document.querySelectorAll('.booster-card').forEach(card => {
+        card.onclick = () => {
+            document.querySelectorAll('.booster-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            selectedBooster = card.dataset.set === "swsh7" ? "heroes" : "origin";
+            if (window.updateBoosterImage) window.updateBoosterImage();
+        };
+    });
+    document.querySelector('.booster-card').classList.add('active');
+    document.getElementById('openBtn').onclick = () => openBooster();
+    document.getElementById('collectionBtn').onclick = () => showCollection();
+    
+    loadData();
+    setupSwipe();
+    loadAllCards();
+</script>
+</body>
+</html>
