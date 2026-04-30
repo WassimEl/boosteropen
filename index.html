@@ -74,7 +74,6 @@ body{background:linear-gradient(135deg,#0a0a15 0%,#1a1a2e 100%);min-height:100vh
 .card-3d.rainbow-card::before{background:linear-gradient(120deg,transparent 0%,rgba(255,0,100,0.3) 25%,rgba(255,165,0,0.3) 35%,rgba(255,255,0,0.3) 45%,rgba(0,255,0,0.3) 55%,rgba(0,100,255,0.3) 65%,rgba(128,0,255,0.3) 75%,transparent 100%);background-size:200% 200%}
 .star-badge{position:absolute;top:10px;right:12px;font-size:1.3rem;z-index:11;animation:twinkle 0.7s infinite}
 @keyframes twinkle{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
-.reverse-tag{position:absolute;top:8px;left:10px;background:rgba(59,130,246,0.9);padding:2px 7px;border-radius:8px;font-size:0.6rem;font-weight:700;z-index:12}
 .card-counter{font-size:0.85rem;opacity:0.6;margin:14px 0 10px;letter-spacing:1px}
 .btn-next{padding:12px 36px;width:auto;margin:0}
 
@@ -87,7 +86,7 @@ body{background:linear-gradient(135deg,#0a0a15 0%,#1a1a2e 100%);min-height:100vh
 @keyframes cardIn{from{opacity:0;transform:scale(0.4) translateY(120px) rotate(-8deg)}to{opacity:1;transform:scale(1) translateY(0) rotate(0)}}
 .card-animate{animation:cardIn 0.45s cubic-bezier(.175,.885,.32,1.275)}
 
-/* COLLECTION MODAL */
+/* COLLECTION MODAL - 6 colonnes */
 .modal{position:fixed;inset:0;background:#0a0a15;z-index:2000;overflow-y:auto;padding:10px}
 .modal.hidden{display:none}
 .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;position:sticky;top:0;background:#0a0a15;padding:6px 0;z-index:10}
@@ -101,15 +100,16 @@ body{background:linear-gradient(135deg,#0a0a15 0%,#1a1a2e 100%);min-height:100vh
 .set-tab.active{background:rgba(245,175,25,0.15);border-color:var(--gold);color:var(--gold)}
 .completion-bar{background:rgba(255,255,255,0.1);border-radius:4px;height:3px;overflow:hidden;margin-bottom:8px}
 .completion-fill{background:linear-gradient(90deg,var(--green),var(--blue));height:100%;transition:width 0.5s}
-.cards-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
-.card-thumb{border-radius:8px;overflow:hidden;cursor:pointer;transition:transform 0.15s;border:1.5px solid transparent;position:relative}
+.cards-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.card-thumb{border-radius:6px;overflow:hidden;cursor:pointer;transition:transform 0.15s;border:1.5px solid transparent;position:relative}
 .card-thumb:hover{transform:scale(1.02)}
 .card-thumb.owned{border-color:rgba(245,175,25,0.4)}
 .card-thumb.unowned img{filter:grayscale(100%) brightness(0.35)}
-.card-thumb img{width:100%;display:block;border-radius:6px}
+.card-thumb img{width:100%;display:block;border-radius:5px}
 .card-thumb .rarity-dot{position:absolute;bottom:2px;right:2px;width:5px;height:5px;border-radius:50%;border:1px solid rgba(0,0,0,0.5)}
 .card-thumb .count-badge{position:absolute;top:2px;left:2px;background:rgba(0,0,0,0.8);padding:1px 3px;border-radius:4px;font-size:0.5rem;font-weight:700;color:var(--gold)}
-.card-thumb .new-indicator{position:absolute;top:2px;right:2px;background:#10b981;width:6px;height:6px;border-radius:50%;animation:pulse 0.5s infinite}
+.card-thumb .new-indicator{position:absolute;top:2px;right:2px;background:#10b981;width:8px;height:8px;border-radius:50%;animation:pulseNew 0.8s ease-in-out 3}
+@keyframes pulseNew{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:0.7}}
 
 /* INSPECT OVERLAY */
 .inspect-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.97);z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -160,9 +160,7 @@ body{background:linear-gradient(135deg,#0a0a15 0%,#1a1a2e 100%);min-height:100vh
   </div>
 
   <div class="booster-zone">
-    <div class="booster-img" id="boosterImg">
-      <!-- Background image set via JS -->
-    </div>
+    <div class="booster-img" id="boosterImg"></div>
     <div class="swipe-hint">👉 GLISSE VERS LA DROITE POUR OUVRIR 👈</div>
   </div>
 
@@ -174,7 +172,6 @@ body{background:linear-gradient(135deg,#0a0a15 0%,#1a1a2e 100%);min-height:100vh
 <div class="overlay hidden" id="revealOverlay">
   <div class="card-3d-wrap">
     <div class="card-3d" id="revealCard">
-      <div class="reverse-tag hidden" id="reverseTag">REVERSE HOLO</div>
       <img class="card-img" id="revealImg" src="" alt="">
       <div class="card-name" id="revealName"></div>
       <span class="card-rarity-badge" id="revealRarity"></span>
@@ -189,7 +186,6 @@ body{background:linear-gradient(135deg,#0a0a15 0%,#1a1a2e 100%);min-height:100vh
 <div class="inspect-overlay hidden" id="inspectOverlay">
   <div class="card-3d-wrap">
     <div class="card-3d" id="inspectCard">
-      <div class="reverse-tag hidden" id="inspectRevTag">REVERSE HOLO</div>
       <img class="card-img" id="inspectImg" src="">
       <div class="card-name" id="inspectName"></div>
       <span class="card-rarity-badge" id="inspectRarity"></span>
@@ -220,7 +216,6 @@ body{background:linear-gradient(135deg,#0a0a15 0%,#1a1a2e 100%);min-height:100vh
 
 <script>
 // ===================== CONFIG =====================
-// Configuration des sets avec IDs officiels Pokémon TCG et images de boosters
 const SETS_CONFIG = {
   heroes: {
     id: "swsh7",
@@ -287,7 +282,7 @@ let cheatMode = false;
 
 function save() {
   try {
-    localStorage.setItem('bg_v7', JSON.stringify({
+    localStorage.setItem('bg_v8', JSON.stringify({
       collection: state.collection,
       boosters: state.boosters,
       level: state.level,
@@ -298,7 +293,7 @@ function save() {
 
 function load() {
   try {
-    const d = JSON.parse(localStorage.getItem('bg_v7') || 'null');
+    const d = JSON.parse(localStorage.getItem('bg_v8') || 'null');
     if (d) {
       state.collection = d.collection || [];
       state.boosters = d.boosters || 0;
@@ -308,7 +303,6 @@ function load() {
   } catch(e) {}
 }
 
-// Mise à jour de l'image du booster
 function updateBoosterImage() {
   const boosterImg = document.getElementById('boosterImg');
   const config = SETS_CONFIG[state.selectedSet];
@@ -316,14 +310,7 @@ function updateBoosterImage() {
     boosterImg.style.backgroundImage = `url('${config.boosterImage}')`;
     boosterImg.style.backgroundSize = 'cover';
     boosterImg.style.backgroundPosition = 'center';
-  } else {
-    // Fallback emoji si l'image ne charge pas
-    boosterImg.style.backgroundImage = 'none';
-    boosterImg.style.display = 'flex';
-    boosterImg.style.alignItems = 'center';
-    boosterImg.style.justifyContent = 'center';
-    boosterImg.style.fontSize = '5rem';
-    boosterImg.innerText = config?.emoji || '🦸';
+    boosterImg.style.display = 'block';
   }
 }
 
@@ -360,7 +347,6 @@ async function loadSet(setKey) {
   const cfg = SETS_CONFIG[setKey];
   document.getElementById('openBtn').textContent = `⏳ Chargement ${cfg.displayName}...`;
   
-  // Afficher un loader sur le booster
   const boosterImg = document.getElementById('boosterImg');
   boosterImg.classList.add('loading');
   
@@ -398,7 +384,7 @@ function pickFromTier(cards, tiers) {
   return cards;
 }
 
-function generateLastSlot(cards) {
+function generateLastSlot(cards, usedIds) {
   const rand = Math.random() * 100;
   let pool;
   if (rand < 45) pool = pickFromTier(cards, ['rare']);
@@ -409,19 +395,12 @@ function generateLastSlot(cards) {
   else pool = cards.filter(c => ['Special Illustration Rare','Hyper Rare','Secret Rare'].includes(c.rarity));
   
   if (!pool || !pool.length) pool = cards;
-  return { ...randomFrom(pool) };
-}
-
-function generateReverseSlot(cards) {
-  const rand = Math.random() * 100;
-  let pool;
-  if (rand < 50) pool = pickFromTier(cards, ['common']);
-  else if (rand < 75) pool = pickFromTier(cards, ['uncommon']);
-  else if (rand < 90) pool = pickFromTier(cards, ['rare']);
-  else if (rand < 97) pool = pickFromTier(cards, ['doubleRare']);
-  else pool = pickFromTier(cards, ['superRare']);
-  if (!pool || !pool.length) pool = cards;
-  return { ...randomFrom(pool), isReverse: true };
+  
+  // Filtrer les cartes déjà utilisées dans ce booster
+  let available = pool.filter(c => !usedIds.has(c.id));
+  if (available.length === 0) available = pool;
+  
+  return { ...randomFrom(available) };
 }
 
 function generatePack() {
@@ -436,22 +415,77 @@ function generatePack() {
       ['Double Rare','Ultra Rare','Illustration Rare','Special Illustration Rare','Hyper Rare','Secret Rare','Rainbow Rare'].includes(c.rarity)
     );
     const usePool = superPool.length >= 5 ? superPool : cards;
-    return Array.from({length:10}, () => ({...randomFrom(usePool)}));
+    
+    // Générer 10 cartes UNIQUES dans le God Pack
+    const uniquePack = [];
+    const availablePool = [...usePool];
+    for (let i = 0; i < 10 && availablePool.length > 0; i++) {
+      const randomIndex = Math.floor(Math.random() * availablePool.length);
+      uniquePack.push({ ...availablePool[randomIndex] });
+      availablePool.splice(randomIndex, 1);
+    }
+    return uniquePack;
   }
   
   isGodPack = false;
   const pack = [];
+  const usedIds = new Set();
+  
   const commons = cards.filter(c => c.rarity === 'Common');
   const uncommons = cards.filter(c => c.rarity === 'Uncommon');
   
   const useCommons = commons.length ? commons : cards;
   const useUncommons = uncommons.length ? uncommons : cards;
   
-  for (let i = 0; i < 4; i++) pack.push({ ...randomFrom(useCommons) });
-  for (let i = 0; i < 3; i++) pack.push({ ...randomFrom(useUncommons) });
-  pack.push({ ...randomFrom(useCommons) });
-  pack.push(generateReverseSlot(cards));
-  pack.push(generateLastSlot(cards));
+  // Slots 1-4: Commons uniques
+  let availableCommons = [...useCommons];
+  for (let i = 0; i < 4 && availableCommons.length > 0; i++) {
+    const randomIndex = Math.floor(Math.random() * availableCommons.length);
+    const card = availableCommons[randomIndex];
+    pack.push({ ...card });
+    availableCommons.splice(randomIndex, 1);
+    usedIds.add(card.id);
+  }
+  
+  // Slots 5-7: Uncommons uniques
+  let availableUncommons = [...useUncommons];
+  for (let i = 0; i < 3 && availableUncommons.length > 0; i++) {
+    const randomIndex = Math.floor(Math.random() * availableUncommons.length);
+    const card = availableUncommons[randomIndex];
+    pack.push({ ...card });
+    availableUncommons.splice(randomIndex, 1);
+    usedIds.add(card.id);
+  }
+  
+  // Slot 8: Common (pas de doublon)
+  let availableSlot8 = useCommons.filter(c => !usedIds.has(c.id));
+  if (availableSlot8.length === 0) availableSlot8 = useCommons;
+  const slot8Card = randomFrom(availableSlot8);
+  pack.push({ ...slot8Card });
+  usedIds.add(slot8Card.id);
+  
+  // Slot 9: Rare+ (pas de doublon)
+  let availableRares = cards.filter(c => !usedIds.has(c.id));
+  if (availableRares.length === 0) availableRares = cards;
+  const rand = Math.random() * 100;
+  let rarePool;
+  if (rand < 45) rarePool = pickFromTier(availableRares, ['rare']);
+  else if (rand < 70) rarePool = pickFromTier(availableRares, ['doubleRare']);
+  else if (rand < 85) rarePool = pickFromTier(availableRares, ['superRare']);
+  else if (rand < 94) rarePool = availableRares.filter(c => ['Illustration Rare','Special Illustration Rare'].includes(c.rarity));
+  else if (rand < 98) rarePool = availableRares.filter(c => ['Hyper Rare','Secret Rare','Rainbow Rare'].includes(c.rarity));
+  else rarePool = availableRares.filter(c => ['Special Illustration Rare','Hyper Rare','Secret Rare'].includes(c.rarity));
+  
+  if (!rarePool || rarePool.length === 0) rarePool = availableRares;
+  const slot9Card = randomFrom(rarePool);
+  pack.push({ ...slot9Card });
+  usedIds.add(slot9Card.id);
+  
+  // Slot 10: Dernière carte rare (pas de doublon)
+  let availableLast = cards.filter(c => !usedIds.has(c.id));
+  if (availableLast.length === 0) availableLast = cards;
+  const lastSlotCard = randomFrom(availableLast);
+  pack.push({ ...lastSlotCard });
   
   return pack;
 }
@@ -470,18 +504,18 @@ function isHoloRarity(rarity) {
   return ['Rare','Double Rare','Ultra Rare','Illustration Rare','Special Illustration Rare','Hyper Rare','Secret Rare','Rainbow Rare'].includes(rarity);
 }
 
-function applyCardEffects(cardEl, card, isReverse = false) {
+function applyCardEffects(cardEl, card) {
   cardEl.classList.remove('holo','glow','rainbow-card');
   const existingStar = cardEl.querySelector('.star-badge');
   if (existingStar) existingStar.remove();
   
-  const isHolo = isHoloRarity(card.rarity) || isReverse;
+  const isHolo = isHoloRarity(card.rarity);
   const isSuper = ['Special Illustration Rare','Hyper Rare','Secret Rare'].includes(card.rarity);
   const isRainbow = card.rarity === 'Rainbow Rare';
   
   if (isHolo) {
     cardEl.classList.add('holo');
-    if (isHoloRarity(card.rarity)) cardEl.classList.add('glow');
+    cardEl.classList.add('glow');
   }
   if (isRainbow) cardEl.classList.add('rainbow-card');
   if (isSuper) {
@@ -509,7 +543,6 @@ function showReveal(pack, idx) {
   const rarity = document.getElementById('revealRarity');
   const setLabel = document.getElementById('revealSet');
   const counter = document.getElementById('cardCounter');
-  const reverseTag = document.getElementById('reverseTag');
   
   overlay.classList.remove('hidden');
   
@@ -527,13 +560,7 @@ function showReveal(pack, idx) {
   setLabel.textContent = card.set;
   counter.textContent = `Carte ${idx+1} / ${pack.length}`;
   
-  if (card.isReverse === true) {
-    reverseTag.classList.remove('hidden');
-  } else {
-    reverseTag.classList.add('hidden');
-  }
-  
-  applyCardEffects(cardEl, card, card.isReverse === true);
+  applyCardEffects(cardEl, card);
   
   cardEl.classList.remove('card-animate');
   void cardEl.offsetWidth;
@@ -544,15 +571,17 @@ function showReveal(pack, idx) {
   const nextBtn = document.getElementById('nextBtn');
   nextBtn.textContent = idx === pack.length - 1 ? '✅ TERMINER' : '✨ SUIVANTE ✨';
   nextBtn.onclick = () => {
-    const cardToAdd = { ...card, obtainedAt: Date.now() };
-    if (card.isReverse) cardToAdd.isReverse = true;
-    
+    // Vérifier si c'est une nouvelle carte
     const alreadyOwned = state.collection.some(c => c.id === card.id);
+    const cardToAdd = { ...card, obtainedAt: Date.now() };
+    
     if (!alreadyOwned) {
       state.newCards.add(card.id);
+      // Faire clignoter le badge nouveau pendant 3 secondes
       setTimeout(() => {
         state.newCards.delete(card.id);
-        if (document.getElementById('colModal').classList.contains('hidden') === false) {
+        // Rafraîchir la collection si elle est ouverte
+        if (!document.getElementById('colModal').classList.contains('hidden')) {
           renderCollection();
         }
       }, 3000);
@@ -560,6 +589,13 @@ function showReveal(pack, idx) {
     
     state.collection.push(cardToAdd);
     save();
+    
+    // Rafraîchir les stats en temps réel
+    updateUI();
+    if (!document.getElementById('colModal').classList.contains('hidden')) {
+      renderCollection();
+    }
+    
     showReveal(pack, idx+1);
   };
 }
@@ -729,13 +765,9 @@ function inspectCard(card, isOwned) {
   document.getElementById('inspectRarity').style.background = isOwned ? color : '#374151';
   document.getElementById('inspectSet').textContent = card.set;
   
-  const revTag = document.getElementById('inspectRevTag');
-  if (card.isReverse === true) revTag.classList.remove('hidden');
-  else revTag.classList.add('hidden');
-  
   const cardEl = document.getElementById('inspectCard');
   cardEl.style.filter = '';
-  applyCardEffects(cardEl, card, card.isReverse === true);
+  applyCardEffects(cardEl, card);
   
   if (!isOwned) {
     cardEl.style.filter = 'grayscale(80%) brightness(0.5)';
@@ -748,7 +780,6 @@ function inspectCard(card, isOwned) {
   };
 }
 
-// Cheat mode: 5 clics sur le logo
 function setupCheatMode() {
   let clickCount = 0;
   let clickTimer = null;
@@ -821,10 +852,7 @@ function setupSetSelector() {
       document.querySelectorAll('.set-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       state.selectedSet = btn.dataset.set;
-      
-      // Mettre à jour l'image du booster
       updateBoosterImage();
-      
       if (!state.loadedSets[state.selectedSet]) {
         loadSet(state.selectedSet);
       }
